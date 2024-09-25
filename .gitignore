@@ -1,5 +1,9 @@
+
 # ignore
 .env
+# datasets
+data/
+*.pickle
 *.xlsx
 *.csv
 
