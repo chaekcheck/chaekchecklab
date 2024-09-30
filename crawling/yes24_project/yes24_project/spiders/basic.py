@@ -30,7 +30,6 @@ class BasicSpider(scrapy.Spider):
 
         for i in range(1, max_page_num+1):
             cate_page_url = response.url + f"?PageNumber={i}"
-
             yield Request(url=cate_page_url, meta=response.meta, callback=self.parse)
         return
 
@@ -72,7 +71,7 @@ class BasicSpider(scrapy.Spider):
     def save_info(self, basic_info_list, columns, cate_code):
         # 결과를 출력하거나 저장
         df = pd.DataFrame(basic_info_list, columns=columns)
-        full_path = os.path.join(r"D:/python_project/chaekchecklab/data/basic", f"{cate_code}.csv")
+        full_path = os.path.join(r"D:/python_project/chaekchecklab/data/basic", f"basic_{cate_code}.csv")
 
         # 최초 생성 이후 mode는 append
         if not os.path.exists(full_path):
