@@ -8,7 +8,7 @@ import csv
 class DetailSpider(scrapy.Spider):
     name = "detail"
     allowed_domains = ["www.yes24.com"]
-    # start_urls = ["https://www.yes24.com/Product/Goods/110157236"]
+    # start_urls = ["https://www.yes24.com/Product/Goods/132381358"]
 
     def start_requests(self):
         # 모든 카테고리의 book url
@@ -26,13 +26,13 @@ class DetailSpider(scrapy.Spider):
 
             for book_url in book_urls:
                 yield Request(url=book_url, meta={"cate_code": category_code}, callback=self.parse)
-                break
+                # break
             break
 
 
     def parse(self, response):
-        self.logger.info(f'Get basic information in {response.url}')
-        print(f'Get basic information in {response.url}')
+        self.logger.info(f'Get detail information in {response.url}')
+        print(f'Get detail information in {response.url}')
 
         # 품목 정보
         item_box = response.css('tbody.b_size')
@@ -47,8 +47,11 @@ class DetailSpider(scrapy.Spider):
         # print(cates)
 
         # 책 소개
-        intro = response.css('div.infoWrap_txtInner textarea::text').get(default='').strip()
+        intro = "".join(response.css('div.infoWrap_txtInner > textarea')[0].css(' ::text').getall()).strip()
+
         # print(intro)
+        with open('intro.txt', 'w', encoding='utf-8') as file:
+            file.write(str(intro))
 
         self.save_info([[response.url, str(item_infos), str(cates), intro]], ['book_url', 'item_infos', 'cates', 'intro'], response.meta['cate_code'])
 

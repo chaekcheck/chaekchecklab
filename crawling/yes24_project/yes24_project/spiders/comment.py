@@ -14,7 +14,7 @@ import csv
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'}
 
 
-def get_comments(cmt_page_url, book_code):
+def get_comments(cmt_page_url, book_url):
     res = requests.get(cmt_page_url, headers= headers)
     soup = BeautifulSoup(res.text, 'html.parser')
 
@@ -39,7 +39,7 @@ def get_comments(cmt_page_url, book_code):
     # cmt_text
     cmt_texts = [e.text.strip().replace('\xa0', '') for e in soup.select('div.origin div.review_cont')]
 
-    return list(zip([book_code]*len(cmts), user_ids, cmt_dates, ratings, cmt_texts))
+    return list(zip([book_url]*len(cmts), user_ids, cmt_dates, ratings, cmt_texts))
 
 
 class CommentSpider(scrapy.Spider):
@@ -69,23 +69,23 @@ class CommentSpider(scrapy.Spider):
         return
     
     def parse(self, response: Response):
-        book_code = response.url.split('/')[-1]
+        book_url = f"https://www.yes24.com/Product/Goods/{response.url.split('/')[-1]}"
 
         comment_list = []
         p_idx = 1
         while True:
             epoch_time = int(time.time())
-            comment_page_url = self.cmt_url.format(book_code, p_idx, epoch_time)
+            comment_page_url = self.cmt_url.format(book_url, p_idx, epoch_time)
             # print(comment_page_url)
 
-            comments = get_comments(comment_page_url, book_code)
+            comments = get_comments(comment_page_url, book_url)
             if not comments:
                 break
             comment_list.extend(comments)
             p_idx += 1
         
         # print(comment_list)
-        self.save_info(comment_list, ['book_code', 'user_ids', 'cmt_dates', 'ratings', 'cmt_texts'], response.meta['cate_code'])
+        self.save_info(comment_list, ['book_url', 'user_ids', 'cmt_dates', 'ratings', 'cmt_texts'], response.meta['cate_code'])
         return
 
     def save_info(self, comment_list, columns, cate_code):

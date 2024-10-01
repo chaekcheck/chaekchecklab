@@ -5,28 +5,34 @@ import pickle
 import pandas as pd
 import os
 import re
+import csv
 
 
 class BasicSpider(scrapy.Spider):
     name = "basic"
     allowed_domains = ["www.yes24.com"]
-    # start_urls = ["https://www.yes24.com/24/Category/Display/001001025007004004"]
+    # start_urls = ["https://www.yes24.com/24/Category/Display/001001025007"]
 
     def start_requests(self):
-        with open('D:/python_project/chaekchecklab/data/novel_dict.pickle', 'rb') as fr:
+        with open('D:/python_project/chaekchecklab/data/category/category_eb.pickle', 'rb') as fr:
             category = pickle.load(fr)
         
         for cate_name, cate_url in category.items():
             cate_code = cate_url.split('/')[-1]
-            # print(cate_code)
+            print(f"{cate_name} 시작합니다.")
+            print(f"{cate_url}")
             yield Request(url=cate_url, meta={"cate_name": cate_name, "cate_code": cate_code}, callback=self.pagenate)
+            
+            # ^^^ for test
+            # break
 
     def pagenate(self, response):
-        print("Page", response.url)
         last_page_link = response.css('div.yesUI_pagenS > a.end::attr(href)').get()
         max_page_num = int(re.search(r'\d+$', last_page_link).group(0))
+        print(f"총 {max_page_num} 페이지")
         
-        max_page_num = 2
+        # ^^^ for test
+        # max_page_num = 2
 
         for i in range(1, max_page_num+1):
             cate_page_url = response.url + f"?PageNumber={i}"
@@ -34,7 +40,8 @@ class BasicSpider(scrapy.Spider):
         return
 
     def parse(self, response):
-        self.logger.info(f'Get basic information in {response.url}')
+        # self.logger.info(f'Get basic information in {response.url}')
+        print(f'Get basic information in {response.url}')
         
         # 상품 박스 선택
         boxes = response.css('div.cCont_goodsSet')
@@ -55,18 +62,20 @@ class BasicSpider(scrapy.Spider):
             full_name = ' '.join(filter(None, [name_front, title_text, name_end, name_feature]))
             # pub_box
             pub_box = box.css('div.goods_pubGrp')
-            authors = pub_box.css('span.goods_auth::text').get(default='').strip()
+            authors = "".join(pub_box.css('span.goods_auth ::text').getall()).strip()
+            # print(authors)
             publisher = pub_box.css('span.goods_pub::text').get(default='')
             # 기본 정보 리스트에 추가
             basic_info_list.append({
                 'title': title_text,
                 'full_name': full_name,
-                'url': book_url,
+                'book_url': book_url,
                 'authors': authors,
                 'publisher': publisher
             })
-        print(f"Save as {response.meta['cate_name']}")
-        self.save_info(basic_info_list, ['title', 'full_name', 'url', 'authors', 'publisher'], response.meta['cate_code'])
+        # self.save_info(basic_info_list, ['title', 'full_name', 'book_url', 'authors', 'publisher'], '001001025007')
+        print(f"Saving {response.meta['cate_name']}")
+        self.save_info(basic_info_list, ['title', 'full_name', 'book_url', 'authors', 'publisher'], response.meta['cate_code'])
 
     def save_info(self, basic_info_list, columns, cate_code):
         # 결과를 출력하거나 저장
@@ -75,7 +84,9 @@ class BasicSpider(scrapy.Spider):
 
         # 최초 생성 이후 mode는 append
         if not os.path.exists(full_path):
-            df.to_csv(full_path, index=False, mode='w')
+            df.to_csv(full_path, index=False, mode='w', quoting=csv.QUOTE_MINIMAL)
         else:
-            df.to_csv(full_path, index=False, mode='a', header=False)
+            df.to_csv(full_path, index=False, mode='a', header=False, quoting=csv.QUOTE_MINIMAL)
+
+        print(f"Saved in basic_{cate_code}.csv")
         return
