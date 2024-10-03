@@ -12,29 +12,39 @@ class DetailSpider(scrapy.Spider):
     allowed_domains = ["www.yes24.com"]
     # start_urls = ["https://www.yes24.com/Product/Goods/390811", "https://www.yes24.com/Product/Goods/3487710", "https://www.yes24.com/Product/Goods/3507854", "https://www.yes24.com/Product/Goods/3618840", "https://www.yes24.com/Product/Goods/3601572", "https://www.yes24.com/Product/Goods/133213071"]
 
-    def start_requests(self):
-        # 모든 카테고리의 book url 가져오기
-        d_path = r"D:\python_project\chaekchecklab\data\basic"
+    # def start_requests(self):
+    #     # 모든 카테고리의 book url 가져오기
+    #     d_path = r"D:\python_project\chaekchecklab\data\basic"
 
-        # ^^^ for test
-        for f_name in os.listdir(d_path):
-            # category_code
-            category_code = f_name.split('.')[0]
-            print(r"Category: {category_code}")
+    #     # ^^^ for test
+    #     for f_name in os.listdir(d_path):
+    #         # category_code
+    #         category_code = f_name.split('_')[1].split('.')[0]
+    #         print(r"Category: {category_code}")
             
-            # book list
-            file_path = os.path.join(d_path, f_name)
+    #         # book list
+    #         file_path = os.path.join(d_path, f_name)
+    #         book_urls = pd.read_csv(file_path).book_url.to_list()
+    #         # print(file_path, len(book_urls))
+
+    #         # ^^^ for test
+    #         for book_url in book_urls:
+    #             yield Request(url=book_url, meta={"cate_code": category_code}, callback=self.parse)
+
+    # ^^^ for part-crawling
+    def start_requests(self):
+        d_path = r"D:\python_project\chaekchecklab\data\basic"
+        cate_code_list = ["001001025006", "001001025012", "001001025001004"]
+
+        for cate_code in cate_code_list:
+            file_path = os.path.join(d_path, f"basic_{cate_code}.csv")
             book_urls = pd.read_csv(file_path).book_url.to_list()
-            # print(file_path, len(book_urls))
-
-            # ^^^ for test
             for book_url in book_urls:
-                yield Request(url=book_url, meta={"cate_code": category_code}, callback=self.parse)
-
+                yield Request(url=book_url, meta={"cate_code": cate_code}, callback=self.parse)
 
     def parse(self, response):
-        # self.logger.info(f'Get detail information in {response.url}')
-        print(f'Get detail information in {response.url}')
+        self.logger.info(f'Get detail information in {response.url}')
+        # print(f'Get detail information in {response.url}')
 
         # 작가
         author_list = []
@@ -73,13 +83,17 @@ class DetailSpider(scrapy.Spider):
         # print(cates)
 
         # 책 소개
-        intro = "".join(response.css('div.infoWrap_txtInner > textarea')[0].css(' ::text').getall()).strip()
+        try:
+            intro = "".join(response.css('div.infoWrap_txtInner > textarea')[0].css(' ::text').getall()).strip()
+        except IndexError:
+            intro = ""
 
         # 저장
         self.save_info([[response.url, author_list, str(item_infos), str(cates), intro]], ['book_url', 'author_list', 'item_infos', 'cates', 'intro'], response.meta['cate_code'])
 
     def save_info(self, detail_info_list, columns, cate_code):
         # print(detail_info_list)
+
         df = pd.DataFrame(detail_info_list, columns=columns)
         full_path = os.path.join(r"D:/python_project/chaekchecklab/data/detail", f"detail_{cate_code}.csv")
 
@@ -89,5 +103,6 @@ class DetailSpider(scrapy.Spider):
         else:
             df.to_csv(full_path, index=False, mode='a', header=False, quoting=csv.QUOTE_MINIMAL)
 
-        print(f"Saved in detail_{cate_code}.csv")
+        # print(f"Saved in detail_{cate_code}.csv")
+        self.logger.info(f'Saved in in detail_{cate_code}.csv')
         return
