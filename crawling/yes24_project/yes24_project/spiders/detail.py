@@ -95,7 +95,8 @@ class DetailSpider(scrapy.Spider):
         # print(detail_info_list)
 
         df = pd.DataFrame(detail_info_list, columns=columns)
-        full_path = os.path.join(r"D:/python_project/chaekchecklab/data/detail", f"detail_{cate_code}.csv")
+        save_path = r"D:/python_project/chaekchecklab/data/detail"
+        full_path = os.path.join(save_path, f"detail_{cate_code}.csv")
 
         # 최초 생성 이후 mode는 append
         if not os.path.exists(full_path):
