@@ -1,5 +1,5 @@
 # yolo
-yolov8n.pt
+*.pt
 # ignore
 .env
 # datasets
