@@ -2,8 +2,8 @@
 from ultralytics import YOLO
 
 from PIL import Image
-import cv2
-import matplotlib.pyplot as plt
+# import cv2
+# import matplotlib.pyplot as plt
 
 import os
 import numpy as np

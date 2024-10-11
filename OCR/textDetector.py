@@ -32,6 +32,9 @@ class TextDetector:
         return text_box_list, prob_list
 
     def filtering_title_box(self, text_box_list, prob_list):
+        if not text_box_list:
+            return [], [], [], []
+
         size_list = [sorted(b.size) for b in text_box_list]
 
         max_char_size = max(next(zip(*size_list)))

@@ -1,5 +1,5 @@
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel, AutoTokenizer
-from konlpy.tag import Kkma
+# from konlpy.tag import Kkma
 import unicodedata
 
 from PIL.Image import Image
@@ -18,7 +18,7 @@ class TextReader():
         self.processor_ko = TrOCRProcessor.from_pretrained("ddobokki/ko-trocr")
         self.model_ko = VisionEncoderDecoderModel.from_pretrained("ddobokki/ko-trocr")
         self.tokenizer_ko = AutoTokenizer.from_pretrained("ddobokki/ko-trocr")
-        self.tokenizer_Kkma = Kkma()
+        # self.tokenizer_Kkma = Kkma()
         return
     
     def read_text(self, text_box: Image) -> str:
@@ -47,7 +47,10 @@ class TextReader():
             log_probs += torch.log(probs[i][0, token_id])  # 로그 확률을 더함
 
         # 로그 확률의 평균 구하기 (기하평균은 로그 확률의 평균을 구한 후 다시 지수화)
-        geometric_mean_log_prob = log_probs / (n_tokens - 1)
+        if n_tokens - 1 > 0:
+            geometric_mean_log_prob = log_probs / (n_tokens - 1)
+        else:
+            geometric_mean_log_prob = 0.0
         geometric_mean_prob = torch.exp(geometric_mean_log_prob).item()
 
         # print(f"Recognized Text: {generated_text}")
