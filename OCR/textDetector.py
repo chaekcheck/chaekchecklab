@@ -1,9 +1,48 @@
 import easyocr
 
-from PIL import Image
+from PIL import Image, ImageOps
 import numpy as np
  
 from collections import deque
+
+def change_to_black_text(text_box):
+    # 흑백 이미지로 전환
+    text_box = text_box.convert("L")
+
+    np_img = np.array(text_box)
+    np_img_1d = np_img.flatten()
+
+    histogram = np.bincount(np_img_1d, minlength=256)  # 0~255의 값에 대한 빈도 계산
+    # $$$ threshold 수정하기
+    threshold = np_img.size/256
+
+    filtered_arr = np.where(histogram < threshold, 0, histogram)
+    filter_img = np_img_1d[filtered_arr[np_img_1d] > 0]
+
+    # 이미지 밝기 값들의 평균과 표준편차 계산
+    mean_brightness = np.mean(filter_img)
+    std_brightness = np.std(filter_img)
+
+    # 표준정규화 (Z-score normalization)
+    normalized_img = (filter_img - mean_brightness) / std_brightness
+
+    normalized_mean = 255 * (np.mean(normalized_img) - normalized_img.min()) / (normalized_img.max() - normalized_img.min())
+
+    # 이진화
+    # v = 72*(normalized_img.max() - normalized_img.min())/255 + normalized_img.min()
+    # th = v * std_brightness + mean_brightness
+    # binary_img = text_box.point(lambda x: 0 if x < th else 255, '1')
+
+    if normalized_mean < 127:
+        text_box = ImageOps.invert(text_box)
+
+    # 정규화된 결과를 다시 이미지로 변환 (시각화를 위해 값 조정)
+    # normalized_img_scaled = 255 * (normalized_img - normalized_img.min()) / (normalized_img.max() - normalized_img.min())
+    # normalized_img_scaled = normalized_img_scaled.astype(np.uint8)
+    # if np.mean(normalized_img_scaled) < 127:
+    #     text_box = ImageOps.invert(text_box)
+
+    return text_box
 
 class TextDetector:
     def __init__(self) -> None:
@@ -47,10 +86,10 @@ class TextDetector:
 
         for tb, prob in zip(text_box_list, prob_list):
             if char_size_range[0] <= min(tb.size) <= char_size_range[1]:
-                title_boxes.append(tb)
+                title_boxes.append(change_to_black_text(tb))
                 title_probs.append(prob)
             else:
-                etc_boxes.append(tb)
+                etc_boxes.append(change_to_black_text(tb))
                 etc_probs.append(prob)
         return title_boxes, title_probs, etc_boxes, etc_probs
 
