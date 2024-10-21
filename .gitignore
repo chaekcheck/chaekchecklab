@@ -2,6 +2,11 @@
 *.pt
 # ignore
 .env
+
+# model
+*.npy
+*.bin
+
 # datasets
 data/
 *.pickle
