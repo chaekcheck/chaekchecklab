@@ -19,6 +19,11 @@
 ## 🚀서비스 흐름도
 <img src="image\책쳌흐름도.png">
 
+## 💻ChaekCheck Web 상세 화면
+<img src="image\상세화면1.png">
+<img src="image\상세화면2.png">
+<img src="image\상세화면3.png">
+
 ## 🌈파이프라인
 <img src="image\책쳌파이프라인.png">
 
