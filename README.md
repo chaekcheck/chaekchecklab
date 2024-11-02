@@ -8,10 +8,10 @@
 ## 📆프로젝트 기간
 2024.09.20 ~ 2024.10.25
 
-## 주요 활용 데이터
+## 🗂️주요 활용 데이터
 책장 사진, yes24 경제경영 카테고리 도서 약 50,000권
 
-## 주요 기능
+## 📌주요 기능
 - OCR: 책장 사진을 통해 책 제목 인식 및 온라인 등록
 - 추천시스템: 이용자 보유 및 선택 도서 기반 책추천
 
@@ -29,7 +29,7 @@
 - 이솔
 - 이어진
 
-## 📌Skills & Tools
+## ⚙️Skills & Tools
 - Language: Python, SQL
 - CV: YOLOv8n, EasyOCR, TrOCR
 - NLP: SentenceTransformer, scikit-learn, Gensim, KoNLPY
