@@ -29,11 +29,7 @@
 
 
 ## 🤗CHAEK CHECK 팀을 소개합니다.
-- 가재준
-- 남혜원
-- 박영요
-- 이솔
-- 이어진
+
 
 ## ⚙️Skills & Tools
 - Language: Python, SQL
